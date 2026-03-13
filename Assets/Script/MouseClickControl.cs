@@ -50,3 +50,6 @@ public class MouseClickControl : MonoBehaviour
         }
     }
 }
+/*
+ 遇到的bug和解决办法：
+ */

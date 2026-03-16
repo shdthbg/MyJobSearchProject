@@ -211,6 +211,7 @@ GameObject:
   - component: {fileID: 3266129158231273286}
   - component: {fileID: 8798564478758019435}
   - component: {fileID: 5698199980519417120}
+  - component: {fileID: 7829334991880055300}
   m_Layer: 6
   m_Name: CharacterHeroRoot
   m_TagString: Untagged
@@ -313,6 +314,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 3063680543394365983}
   panelChildName: Plane
+--- !u!195 &7829334991880055300
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277583573932214376}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &367726332444531311
 GameObject:
   m_ObjectHideFlags: 0

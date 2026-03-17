@@ -16032,6 +16032,7 @@ GameObject:
   - component: {fileID: 153281679}
   - component: {fileID: 153281677}
   - component: {fileID: 153281676}
+  - component: {fileID: 153281681}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -16121,6 +16122,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &153281681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 153281675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be16ff04ff7535c4a9d58b6ee43facfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 426470024}
+  pivotHeight: 1
+  defaultRadius: 10
+  minRadius: 5
+  maxRadius: 20
+  minVerticalAngle: 20
+  maxVerticalAngle: 75
+  defaultVerticalAngle: 50
+  rotateHorizontalSensitivity: 180
+  rotateVerticalSensitivity: 80
+  scrollSensitivity: 3
+  smoothSpeed: 10
 --- !u!1001 &153784221
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -44517,6 +44542,11 @@ MonoBehaviour:
   distanceTolerance: 0.1
   moveSpeed: 3
   CAniCtrl: {fileID: 0}
+--- !u!4 &426470024 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4157566364949281500, guid: 7e686ffbfb48ffb4c83bdcbbde68632c, type: 3}
+  m_PrefabInstance: {fileID: 561164137}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &427060740
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -71210,6 +71240,7 @@ MonoBehaviour:
   walkable:
     serializedVersion: 2
     m_Bits: 256
+  camFollow: {fileID: 153281681}
 --- !u!4 &687300608
 Transform:
   m_ObjectHideFlags: 0
@@ -75578,8 +75609,16 @@ PrefabInstance:
     m_TransformParent: {fileID: 1704822045}
     m_Modifications:
     - target: {fileID: 156182, guid: 9422ab5dcc693294bbd5f0de0d119160, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 156182, guid: 9422ab5dcc693294bbd5f0de0d119160, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 156182, guid: 9422ab5dcc693294bbd5f0de0d119160, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 428106, guid: 9422ab5dcc693294bbd5f0de0d119160, type: 3}
       propertyPath: m_RootOrder
@@ -104947,6 +104986,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Env_MineTunnel_Straight_02
       objectReference: {fileID: 0}
+    - target: {fileID: 156182, guid: 9422ab5dcc693294bbd5f0de0d119160, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 156182, guid: 9422ab5dcc693294bbd5f0de0d119160, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 428106, guid: 9422ab5dcc693294bbd5f0de0d119160, type: 3}
       propertyPath: m_RootOrder
       value: 440
@@ -106705,7 +106752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 446560, guid: ae56c52be3dec9f4d989d7f3064e95cb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -5.54
+      value: -5.19
       objectReference: {fileID: 0}
     - target: {fileID: 446560, guid: ae56c52be3dec9f4d989d7f3064e95cb, type: 3}
       propertyPath: m_LocalPosition.z

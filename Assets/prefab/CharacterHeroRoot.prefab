@@ -212,6 +212,7 @@ GameObject:
   - component: {fileID: 8798564478758019435}
   - component: {fileID: 5698199980519417120}
   - component: {fileID: 7829334991880055300}
+  - component: {fileID: 7253563984879345969}
   m_Layer: 6
   m_Name: CharacterHeroRoot
   m_TagString: Untagged
@@ -250,7 +251,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   diversionSpeed: 15
-  CAniCtrl: {fileID: 0}
+  navMeshMoveCtrl: {fileID: 0}
 --- !u!136 &3266129158231273286
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -270,7 +271,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.27236795
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
@@ -336,6 +337,24 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &7253563984879345969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277583573932214376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55dc4ddec40d43f42a0575bbbd5dfaef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveDistance: 20
+  isMoving: 0
+  moveEndPos: {x: 0, y: 0, z: 0}
+  distanceTolerance: 0.1
+  moveSpeed: 3
+  CAniCtrl: {fileID: 0}
 --- !u!1 &367726332444531311
 GameObject:
   m_ObjectHideFlags: 0

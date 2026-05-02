@@ -1,0 +1,27 @@
+{
+  "models": [
+    {
+      "title": "DeepSeek V4 Flash",
+      "provider": "openai",
+      "model": "deepseek-v4-flash",
+      "apiBase": "https://api.deepseek.com/v1",
+      "apiKey": "sk-784417b5812344b6949e51756f2780ff",
+      "completionOptions": {
+        "temperature": 0.3,
+        "maxTokens": 4096
+      },
+      "requestOptions": {
+        "extraBody": {
+          "thinking_mode": "thinking"
+        }
+      }
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "DeepSeek V4 Flash",
+    "provider": "openai",
+    "model": "deepseek-v4-flash",
+    "apiBase": "https://api.deepseek.com/v1",
+    "apiKey": "sk-784417b5812344b6949e51756f2780ff"
+  }
+}

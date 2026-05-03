@@ -71,19 +71,21 @@ public class ClickSelector : MonoBehaviour
         SelectEvent.Instance?.DeselectCurrentCharacter();
     }
 
-    // Alt + 左键点击处理（强制移动到地面，即使无选中角色？原逻辑：有选中角色时移动）
-    void HandleAltClick(RaycastHit hit)
+// Alt + 左键点击处理：穿透角色，只检测地面
+void HandleAltClick(RaycastHit _)   // 忽略参数，避免使用 InputManager 传入的碰撞结果
+{
+    // 重新从鼠标位置发射射线，仅检测 walkableLayer
+    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, walkableLayer))
     {
-        if (IsInLayer(hit.collider.gameObject, walkableLayer))
+        if (selectedCharacter != null)
         {
-            if (selectedCharacter != null)
-            {
-                selectedCharacter.GetComponent<CharacterMoveControl>()
-                    ?.SetTargetPosition(hit.point);
-            }
+            selectedCharacter.GetComponent<CharacterMoveControl>()
+                ?.SetTargetPosition(hit.point);
         }
-        // Alt 点击非地面不做处理
     }
+    // 点击非地面层时不做任何事（保持原逻辑）
+}
 
     // 通过 SelectEvent 回调更新本地 selectedCharacter
     void OnCharacterSelectedFromEvent(GameObject obj) => selectedCharacter = obj;

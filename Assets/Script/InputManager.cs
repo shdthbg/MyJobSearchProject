@@ -7,7 +7,7 @@ public class InputManager : MonoBehaviour
 {
     // 通过事件将点击结果发出
     public event Action<RaycastHit> OnLeftClick;     // 左键点击
-    public event Action<RaycastHit> OnRightClick;    // 右键点击
+//    public event Action<RaycastHit> OnRightClick;    // 右键点击
     public event Action<RaycastHit> OnAltClick;      // Alt+左键
 
     [SerializeField] private Camera mainCamera;       // 用于射线

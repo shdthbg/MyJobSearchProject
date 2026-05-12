@@ -36,7 +36,7 @@ public static class EventBus
             }
         }
     }
-    public static void EventTigger<T>(E_EventType eventID, T args)
+    public static void EventTrigger<T>(E_EventType eventID, T args)
     {
         if (eventDic.ContainsKey(eventID))
         {
@@ -81,7 +81,7 @@ public static class EventBus
         }
     }
 
-    public static void EventTigger(E_EventType eventID)
+    public static void EventTrigger(E_EventType eventID)
     {
         if (eventDic.ContainsKey(eventID))
         {

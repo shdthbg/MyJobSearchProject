@@ -9,7 +9,7 @@ public class BattleQueue
     private List<int> nowRoundQueue = new();    //当前回合队列
     private List<int> readyQueue = new();       //准备队列(两个队列的int都是角色ID)
     private Dictionary<int, float> unitSpeeds;  // ID -> 速度
-    private bool isActive;                      //当前是否在进行回合循环
+    //private bool isActive;                      //当前是否在进行回合循环
 
     // 当新的回合开始时触发（参数：当前回合的单位顺序列表）
     public event Action<List<int>> OnRoundStart;
@@ -39,7 +39,7 @@ public class BattleQueue
             List<int> getNowOrder = GetNowOrder();
             OnRoundStart?.Invoke(getNowOrder);
             OnUnitTurnStart?.Invoke(nowRoundQueue[0]);
-            isActive = true;
+            //isActive = true;
         }
     }
 

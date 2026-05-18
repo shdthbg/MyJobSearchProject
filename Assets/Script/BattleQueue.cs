@@ -41,6 +41,7 @@ public class BattleQueue
             OnUnitTurnStart?.Invoke(nowRoundQueue[0]);
             //isActive = true;
         }
+        Debug.Log($"[BattleQueue] 初始化完成。现回合队列顺序：{string.Join(",", nowRoundQueue)}");
     }
 
     /// <summary>
@@ -68,8 +69,9 @@ public class BattleQueue
             Debug.LogWarning($"出队失败：单位 {unitID} 不在当前队列中");
             return;
         }
-
+        
         InsertSorted(readyQueue, unitID);
+        Debug.Log($"[BattleQueue] OnTurnEnd: 单位{unitID}从当前队列移除，已加入准备队列。当前队列剩余：{nowRoundQueue.Count}");
         if (nowRoundQueue.Count > 0)
         {
             OnUnitTurnStart?.Invoke(nowRoundQueue[0]);
@@ -102,6 +104,7 @@ public class BattleQueue
                 FinishRound();
             }
         }
+        Debug.Log($"[BattleQueue] RemoveUnit: 单位{unitID}已从队列移除");
     }
 
     /// <summary>
@@ -123,6 +126,7 @@ public class BattleQueue
                 List<int> getNowOrder = GetNowOrder();
                 OnRoundStart?.Invoke(getNowOrder);
                 OnUnitTurnStart?.Invoke(nowRoundQueue[0]);
+                Debug.Log($"[BattleQueue] FinishRound: 新回合开始！顺序：{string.Join(",", nowRoundQueue)}");
                 return;
             }
         }

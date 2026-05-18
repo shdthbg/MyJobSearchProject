@@ -43,6 +43,7 @@ public static class EventBus
             Action<T> action = eventDic[eventID] as Action<T>;
             if(action != null)
             {
+                Debug.Log($"[EventBus] 触发事件 {eventID}，参数：{args}");
                 action.Invoke(args);
             }
             else
@@ -88,6 +89,7 @@ public static class EventBus
             Action action = eventDic[eventID] as Action;
             if(action != null)
             {
+                Debug.Log($"[EventBus] 触发事件 {eventID} (无参数)");
                 action.Invoke();
             }
             else

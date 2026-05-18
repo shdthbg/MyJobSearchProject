@@ -8,6 +8,21 @@ public class BattleManager : MonoBehaviour
     private BattleQueue battleQueue;
     private Dictionary<int,GameObject> unitObjMap;  //单位ID到场景对象的映射 
     private bool isBattleActive;                    //战斗是否进行中
+    public static BattleManager Instance { get; private set; }
+    void Awake()
+    {
+        // 单例初始化（确保全局唯一）
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // 跨场景保留
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     public void StartBattle(List<(int id,float speed,GameObject obj)> participants)
     {
         if(isBattleActive) EndBattle();
@@ -63,24 +78,29 @@ public class BattleManager : MonoBehaviour
     {
         if(!isBattleActive) return;
         battleQueue.OnTurnEnd(unitID);
+        Debug.Log($"[BattleManager] 收到外部 TurnEnd 事件，单位ID：{unitID}");
     }
     private void OnExternalUnitDied(int unitID)
     {
         if(!isBattleActive) return;
         battleQueue.RemoveUnit(unitID);
+        Debug.Log($"[BattleManager] 收到外部 UnitDied 事件，单位ID：{unitID}");
     }
 
     private void OnRoundStartBridge(List<int> order)
     {
         EventBus.EventTrigger(E_EventType.RoundStart,order);
+        Debug.Log($"[BattleManager] 桥接 OnRoundStart，顺序：{string.Join(",", order)}");
     }
     private void OnUnitTurnStartBridge(int unitID)
     {
         EventBus.EventTrigger(E_EventType.TurnStart, unitID);
+        Debug.Log($"[BattleManager] 桥接 OnUnitTurnStart，单位ID：{unitID}");
     }
     private void OnAllUnitsActedBridge()
     {
         EventBus.EventTrigger(E_EventType.AllUnitsActed);
+        Debug.Log($"[BattleManager] 桥接 OnAllUnitsActed");
     }
     private void OnBattleEndBridge()
     {

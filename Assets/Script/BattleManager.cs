@@ -9,6 +9,8 @@ public class BattleManager : MonoBehaviour
     private Dictionary<int,GameObject> unitObjMap;  //单位ID到场景对象的映射 
     private bool isBattleActive;                    //战斗是否进行中
     public static BattleManager Instance { get; private set; }
+    public bool IsBattleActive => isBattleActive;
+    public BattleQueue GetBattleQueue =>battleQueue;
     void Awake()
     {
         // 单例初始化（确保全局唯一）

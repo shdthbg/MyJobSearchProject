@@ -11,6 +11,19 @@ public class BattleTestStarter : MonoBehaviour
         {
             StartTestBattle();
         }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // 获取当前行动单位ID（如果战斗已激活）
+            if (BattleManager.Instance.IsBattleActive && BattleManager.Instance.GetBattleQueue != null)
+            {
+                int currentID = BattleManager.Instance.GetBattleQueue.GetNowUnit();
+                if (currentID != -1)
+                {
+                    Debug.Log($"[Test] 按下空格，发布 TurnEnd，单位ID：{currentID}");
+                    EventBus.EventTrigger(E_EventType.TurnEnd, currentID);
+                }
+            }
+        }
     }
 
     void StartTestBattle()

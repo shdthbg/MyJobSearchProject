@@ -11,6 +11,7 @@ public class BattleManager : MonoBehaviour
     public static BattleManager Instance { get; private set; }
     public bool IsBattleActive => isBattleActive;
     public BattleQueue GetBattleQueue =>battleQueue;
+    public ClickSelector clickSelector;
     void Awake()
     {
         // 单例初始化（确保全局唯一）
@@ -23,6 +24,7 @@ public class BattleManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        clickSelector = FindObjectOfType<ClickSelector>();
     }
 
     public void StartBattle(List<(int id,float speed,GameObject obj)> participants)
@@ -49,8 +51,18 @@ public class BattleManager : MonoBehaviour
         //订阅TurnEnd和UnitDied
         EventBus.AddEventListener<int>(E_EventType.TurnEnd,OnExternalTurnEnd);
         EventBus.AddEventListener<int>(E_EventType.UnitDied,OnExternalUnitDied);
-        
+
         EventBus.EventTrigger(E_EventType.BattleStart,participants);     
+        
+        //确保每个参与者都有unitAPManger
+        foreach(var p in unitObjMap)
+        {
+            UnitAPManager unitAPManager = p.Value.GetComponent<UnitAPManager>();
+            if(unitAPManager == null)
+            {
+                p.Value.AddComponent<UnitAPManager>();
+            }
+        }
         //把id->speed 数据压入队列初始化方法
         var speedIDs = new List<(int id ,float speed)>();
         foreach(var p in participants)
@@ -59,6 +71,10 @@ public class BattleManager : MonoBehaviour
         }
         battleQueue.InitQueue(speedIDs);
         isBattleActive = true;  
+        if(clickSelector != null)
+        {
+            clickSelector.enabled = false;
+        }
     }
 
     public void EndBattle()
@@ -75,7 +91,28 @@ public class BattleManager : MonoBehaviour
         battleQueue.BattleQueueClear();
         isBattleActive =false;
         EventBus.EventTrigger(E_EventType.BattleEnd);
+        if(clickSelector != null)
+        {
+            clickSelector.enabled = true;
+        }
     }
+
+    public void AddUnitToBattle(int id,float speed,GameObject obj)
+    {
+        if (unitObjMap.ContainsKey(id))
+        {
+            Debug.LogWarning($"单位 {id} 已在战斗中，无法重复加入");
+            return;
+        }
+
+        unitObjMap.Add(id, obj);
+        if (obj.GetComponent<UnitAPManager>() == null)
+            obj.AddComponent<UnitAPManager>();
+
+        battleQueue.AddUnit(id, speed);
+        Debug.Log($"[BattleManager] 新敌人 {id} 加入战斗");
+    }
+
     private void OnExternalTurnEnd(int unitID)
     {
         if(!isBattleActive) return;
@@ -96,7 +133,15 @@ public class BattleManager : MonoBehaviour
     }
     private void OnUnitTurnStartBridge(int unitID)
     {
+        GameObject currentObj  = unitObjMap[unitID];
+        currentObj.GetComponent<UnitAPManager>().ResetAP();
         EventBus.EventTrigger(E_EventType.TurnStart, unitID);
+        
+        //测试用敌人ai
+        if (currentObj != null && !currentObj.GetComponent<UnitIdentity>().isPlayer)
+        StartCoroutine(EnemyAutoTurnEnd(unitID));
+        
+        
         Debug.Log($"[BattleManager] 桥接 OnUnitTurnStart，单位ID：{unitID}");
     }
     private void OnAllUnitsActedBridge()
@@ -107,6 +152,47 @@ public class BattleManager : MonoBehaviour
     private void OnBattleEndBridge()
     {
         EventBus.EventTrigger(E_EventType.BattleEnd);
+    }
+    public bool TrySpendCurrentUnitAP(int unitID, int cost)
+    {   bool isSpendSucess = false;
+        UnitAPManager currentUnitAPManger = unitObjMap[unitID].GetComponent<UnitAPManager>();
+        isSpendSucess = currentUnitAPManger.TrySpendAP(cost);
+        if (isSpendSucess)
+        {
+            if (currentUnitAPManger.IsAPExhausted())
+            {
+                EventBus.EventTrigger(E_EventType.TurnEnd,unitID);
+            }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    public bool IsCurrentUnitPlayer()
+    {
+        int currentID = battleQueue?.GetNowUnit()??-1;
+        if(currentID == -1)return false;
+        if(unitObjMap.TryGetValue(currentID,out GameObject obj))
+        {
+           var identity = obj.GetComponent<UnitIdentity>();
+           return identity != null && identity.isPlayer; 
+        }
+        return false;
+    }
+    public GameObject GetUnitObject(int unitID)
+    {
+        return unitObjMap[unitID];
+    }
+
+
+    //测试用敌人ai协程
+    private IEnumerator EnemyAutoTurnEnd(int unitID)
+    {   
+        yield return new WaitForSeconds(5f);
+        EventBus.EventTrigger(E_EventType.TurnEnd, unitID);
     }
 }
 

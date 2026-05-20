@@ -22,8 +22,8 @@ public class EnemySensor : MonoBehaviour
     {
         NavMeshHit self,player;
         float pathLength = 0;
-        if(!NavMesh.SamplePosition(playerTransform.position, out player,2f,NavMesh.AllAreas) ||
-            !NavMesh.SamplePosition(this.transform.position, out self,2f,NavMesh.AllAreas)) return false;
+        if(!NavMesh.SamplePosition(playerTransform.position, out player,1f,NavMesh.AllAreas) ||
+            !NavMesh.SamplePosition(this.transform.position, out self,1f,NavMesh.AllAreas)) return false;
         else
         {
             NavMesh.CalculatePath(self.position,player.position,NavMesh.AllAreas,cachedPath);
@@ -37,10 +37,14 @@ public class EnemySensor : MonoBehaviour
                     {
                         pathLength+=Vector3.Distance(cachedPath.corners[i-1],cachedPath.corners[i]);
                     }
-                    if(pathLength <= distanceThreshold) return true;
-                    else return false;
                 }
-                else return false;
+                else
+                {
+                    pathLength = Vector3.Distance(self.position,player.position);
+                }
+                bool isWithin = pathLength <= distanceThreshold;
+                Debug.Log($"[EnemySensor {name}] 路径长度={pathLength:F2}m, 阈值={distanceThreshold}m, 拐点数={cachedPath.corners.Length}, 结果={isWithin}");
+                return pathLength <= distanceThreshold;
             }
         }
     }

@@ -6,11 +6,11 @@ using UnityEngine;
 
 public class BattleProximityDetector : MonoBehaviour
 {
-    private bool isActive = false;  //用于记录是否是主控角色
+    private bool isActive = false;  
     SphereCollider trigger;
     private Coroutine detectionCoroutine;
     HashSet<EnemySensor> enemiesInRange = new();//进入触发器的带敌人判断脚本的敌人表
-    public float engageDistance = 8f;//战斗触发阈值
+    public float engageDistance = 20f;//战斗触发阈值
     public float triggerRadius = 20f;//触发器半径
     // Start is called before the first frame update
     void Awake()
@@ -91,8 +91,27 @@ public class BattleProximityDetector : MonoBehaviour
     /// </summary>
     private void PerformDetection()
     {
-       if(BattleManager.Instance.IsBattleActive) return;
-       List<EnemySensor> readyEnemis = new();
+        if(BattleManager.Instance.IsBattleActive)
+        {
+            List<EnemySensor> toAdd = new List<EnemySensor>();
+            foreach (var enemy in enemiesInRange)
+            {
+                if (enemy != null && enemy.CheckEngageDistance(transform, engageDistance))
+                    toAdd.Add(enemy);
+            }
+            
+            foreach (var enemy in toAdd)
+            {
+                UnitIdentity idComp = enemy.GetComponent<UnitIdentity>();
+                if (idComp != null)
+                {
+                    BattleManager.Instance.AddUnitToBattle(idComp.unitID, idComp.speed, enemy.gameObject);
+                    enemiesInRange.Remove(enemy);
+                }
+            }
+            return;
+        }
+        List<EnemySensor> readyEnemis = new();
         foreach (var i in enemiesInRange)
         {
             if(i == null) continue;
@@ -115,6 +134,9 @@ public class BattleProximityDetector : MonoBehaviour
             if(indentity != null)
             participants.Add((indentity.unitID,indentity.speed,i.gameObject));
         }
+
+        Debug.Log($"[BPD] 本轮满足条件敌人数量={readyEnemis.Count}");
+
         if (readyEnemis.Count == 0) return;
         BattleManager.Instance.StartBattle(participants);
     }
@@ -125,6 +147,7 @@ public class BattleProximityDetector : MonoBehaviour
         {
             enemiesInRange.Add(otherSensor);
         }
+        Debug.Log($"{other.name} 进入触发器，距离={Vector3.Distance(transform.position, other.transform.position)}");
     }
     void OnTriggerExit(Collider other)
     {
@@ -133,5 +156,6 @@ public class BattleProximityDetector : MonoBehaviour
         {
             enemiesInRange.Remove(otherSensor);
         }
+        Debug.Log($"{other.name} 离开触发器，距离={Vector3.Distance(transform.position, other.transform.position)}");
     }
 }

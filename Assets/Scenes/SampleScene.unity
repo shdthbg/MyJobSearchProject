@@ -134,8 +134,8 @@ GameObject:
   - component: {fileID: 395493042}
   - component: {fileID: 395493045}
   - component: {fileID: 395493044}
-  - component: {fileID: 395493046}
   - component: {fileID: 395493047}
+  - component: {fileID: 395493048}
   m_Layer: 0
   m_Name: InputManager
   m_TagString: Untagged
@@ -203,19 +203,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   cameraFollow: {fileID: 963194229}
---- !u!114 &395493046
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 395493041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d73cedf01e71494b97b9b86f3a3f0b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  testUnits: []
 --- !u!114 &395493047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,6 +215,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4aef34ab8c5793648a292a36971cfc77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSelector: {fileID: 0}
+--- !u!114 &395493048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395493041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3848b56d02ef894c838e756c8a09165, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputManager: {fileID: 395493042}
+  characterLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  walkableLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  cameraFollow: {fileID: 963194229}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -635,7 +643,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32306a4a3d3fb6046bc14ce2bdfe0995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  engageDistance: 8
+  engageDistance: 20
   triggerRadius: 20
 --- !u!114 &1655711623
 MonoBehaviour:

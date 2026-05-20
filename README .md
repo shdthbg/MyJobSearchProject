@@ -114,7 +114,7 @@ BattleQueue.OnTurnEnd → 下一个单位或下一回合
 ### `BattleProximityDetector`
 
 - `engageDistance`：战斗触发距离（路径长度），默认 20。
-- `triggerRadius`：触发器半径，默认 20（应 ≥ engageDistance）。
+- `triggerRadius`：触发器半径 默认20（应 ≥ engageDistance）。
 
 ### `NavMeshMoveCtrl`
 

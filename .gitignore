@@ -58,3 +58,20 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+# ========== 建议补充 ==========
+
+# 1. 项目定制/个人配置
+# 忽略整个 .idea/ 文件夹 (JetBrains Rider 的本地配置)
+.idea/
+
+# 2. macOS 系统文件
+# 避免 macOS 用户在图形界面下生成的 .DS_Store 文件被误提交
+.DS_Store
+
+# 3. 特定第三方插件 (如果使用的话)
+# 你的项目有 Odin Inspector，因此建议加上
+/[Aa]ssets/Plugins/Sirenix/
+
+# 4. 特定的临时/缓存文件 (如果观察到有此文件)
+# 忽略项目根目录下可能出现的特定缓存文件
+/your_specific_file.cache

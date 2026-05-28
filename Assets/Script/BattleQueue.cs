@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Linq;
+using Unity.VisualScripting;
 
 public class BattleQueue
 {
@@ -193,7 +194,15 @@ public class BattleQueue
     private void InsertSorted(List<int> list , int unitID)
     {
         float speed = unitSpeeds[unitID];
-        int index = list.FindIndex(id => unitSpeeds[id] < speed);
+        int index = -1;
+        for(int i = 0;i<list.Count;i++)
+        {
+            if(unitSpeeds[list[i]]<speed)
+            {
+                index = i;
+                break;
+            }
+        }
         if(index <0 )
             index = list.Count;//如果上一步返回-1，也就是没有找到速度小于当前单位速度的话，插入在末尾
         list.Insert(index,unitID);//在索引处插入ID

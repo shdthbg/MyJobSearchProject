@@ -95,6 +95,7 @@ public class BattleManager : MonoBehaviour
         {
             clickSelector.enabled = true;
         }
+        Debug.Log("[BattleManager] 战斗结束，已退出战斗模式，返回自由探索模式");
     }
 
     public void AddUnitToBattle(int id,float speed,GameObject obj)
@@ -124,6 +125,37 @@ public class BattleManager : MonoBehaviour
         if(!isBattleActive) return;
         battleQueue.RemoveUnit(unitID);
         Debug.Log($"[BattleManager] 收到外部 UnitDied 事件，单位ID：{unitID}");
+
+         //从映射表中获取并销毁游戏对象
+        if (unitObjMap.TryGetValue(unitID, out GameObject deadObj))
+        {
+            unitObjMap.Remove(unitID);               // 防止后续访问空引用
+            Destroy(deadObj, 0.5f);                  // 延迟0.5秒销毁，给死亡特效/动画留时间（当前占位）
+            Debug.Log($"[BattleManager] 单位 {unitID} 游戏对象已销毁");
+        }
+          // 3. 检查战斗结束条件（一方全灭）
+        bool hasPlayer = false;
+        bool hasEnemy = false;
+        foreach (var kvp in unitObjMap)
+        {
+            UnitIdentity identity = kvp.Value.GetComponent<UnitIdentity>();
+            if (identity != null)
+            {
+                if (identity.isPlayer) hasPlayer = true;
+                else hasEnemy = true;
+            }
+        }
+        if (!hasPlayer)
+        {
+            Debug.Log("[BattleManager] 所有玩家单位死亡，战斗失败");
+            EndBattle();
+        }
+        else if (!hasEnemy)
+        {
+            Debug.Log("[BattleManager] 所有敌人死亡，战斗胜利！");
+            EndBattle();
+        }
+        
     }
 
     private void OnRoundStartBridge(List<int> order)
@@ -139,7 +171,7 @@ public class BattleManager : MonoBehaviour
         
         //测试用敌人ai
         if (currentObj != null && !currentObj.GetComponent<UnitIdentity>().isPlayer)
-        StartCoroutine(EnemyAutoTurnEnd(unitID));
+            StartCoroutine(EnemyDieAfterDelay(unitID,3f));
         
         
         Debug.Log($"[BattleManager] 桥接 OnUnitTurnStart，单位ID：{unitID}");
@@ -188,11 +220,18 @@ public class BattleManager : MonoBehaviour
     }
 
 
-    //测试用敌人ai协程
-    private IEnumerator EnemyAutoTurnEnd(int unitID)
-    {   
-        yield return new WaitForSeconds(5f);
-        EventBus.EventTrigger(E_EventType.TurnEnd, unitID);
+    // //测试用敌人ai协程
+    // private IEnumerator EnemyAutoTurnEnd(int unitID)
+    // {   
+    //     yield return new WaitForSeconds(5f);
+    //     EventBus.EventTrigger(E_EventType.TurnEnd, unitID);
+    // }
+    // 敌人延迟死亡占位
+    private IEnumerator EnemyDieAfterDelay(int unitID, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        EventBus.EventTrigger(E_EventType.UnitDied, unitID);
+        Debug.Log($"[BattleManager] 敌人 {unitID} 死亡（占位逻辑）");
     }
 }
 

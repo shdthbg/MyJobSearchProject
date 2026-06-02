@@ -79,7 +79,7 @@ BattleQueue.OnTurnEnd → 下一个单位或下一回合
    - 模型 + `NavMeshAgent` + `NavMeshMoveCtrl`（可选，AI 尚仅结束回合）。
    - 添加 `UnitIdentity`，`isPlayer` 不勾选，填写 `unitID`。
    - 添加 `EnemySensor` 脚本。
-   - 放入 `enemyLayer`。
+   - 添加`Charactor Controller`组件
 4. **配置管理器**：
    - 场景中必须有 `SelectEvent` 单例（挂任意对象）。
    - `BattleManager` 单例（挂任意对象），并在 Inspector 中拖拽 `ClickSelector` 引用。

@@ -12,6 +12,8 @@ public class BattleManager : MonoBehaviour
     public bool IsBattleActive => isBattleActive;
     public BattleQueue GetBattleQueue =>battleQueue;
     public ClickSelector clickSelector;
+    public Dictionary<int, GameObject> GetUnitObjMap() => unitObjMap;
+    
     void Awake()
     {
         // 单例初始化（确保全局唯一）
@@ -168,12 +170,7 @@ public class BattleManager : MonoBehaviour
         GameObject currentObj  = unitObjMap[unitID];
         currentObj.GetComponent<UnitAPManager>().ResetAP();
         EventBus.EventTrigger(E_EventType.TurnStart, unitID);
-        
-        //测试用敌人ai
-        if (currentObj != null && !currentObj.GetComponent<UnitIdentity>().isPlayer)
-            StartCoroutine(EnemyDieAfterDelay(unitID,3f));
-        
-        
+                
         Debug.Log($"[BattleManager] 桥接 OnUnitTurnStart，单位ID：{unitID}");
     }
     private void OnAllUnitsActedBridge()
@@ -186,21 +183,11 @@ public class BattleManager : MonoBehaviour
         EventBus.EventTrigger(E_EventType.BattleEnd);
     }
     public bool TrySpendCurrentUnitAP(int unitID, int cost)
-    {   bool isSpendSucess = false;
+    {
         UnitAPManager currentUnitAPManger = unitObjMap[unitID].GetComponent<UnitAPManager>();
-        isSpendSucess = currentUnitAPManger.TrySpendAP(cost);
-        if (isSpendSucess)
-        {
-            if (currentUnitAPManger.IsAPExhausted())
-            {
-                EventBus.EventTrigger(E_EventType.TurnEnd,unitID);
-            }
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        bool success = currentUnitAPManger.TrySpendAP(cost);
+        // 移除旧的自动 TurnEnd 逻辑
+        return success;
     }
     
     public bool IsCurrentUnitPlayer()
@@ -219,20 +206,6 @@ public class BattleManager : MonoBehaviour
         return unitObjMap[unitID];
     }
 
-
-    // //测试用敌人ai协程
-    // private IEnumerator EnemyAutoTurnEnd(int unitID)
-    // {   
-    //     yield return new WaitForSeconds(5f);
-    //     EventBus.EventTrigger(E_EventType.TurnEnd, unitID);
-    // }
-    // 敌人延迟死亡占位
-    private IEnumerator EnemyDieAfterDelay(int unitID, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        EventBus.EventTrigger(E_EventType.UnitDied, unitID);
-        Debug.Log($"[BattleManager] 敌人 {unitID} 死亡（占位逻辑）");
-    }
 }
 
 

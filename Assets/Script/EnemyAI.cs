@@ -36,9 +36,12 @@ public class EnemyAI : MonoBehaviour
         myUnitID = identity.unitID;
         apManager = GetComponent<UnitAPManager>();
         moveCtrl = GetComponent<NavMeshMoveCtrl>();
-        animationCtrl = GetComponent<BaseAniCtrl>();
     }
-    
+    void Start()
+    {
+        animationCtrl = GetComponent<NavMeshMoveCtrl>().CAniCtrl;
+    }
+
     void OnEnable()
     {
         EventBus.AddEventListener<int>(E_EventType.TurnStart,OnTurnStart);

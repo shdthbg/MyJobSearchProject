@@ -91,21 +91,30 @@ public class BattleQueue
     /// <param name="unitID">"死亡"的单位</param>
     public void RemoveUnit(int unitID)
     {
-        if(unitID == GetNowUnit())
+        // 记录是否移除了当前行动单位（队首）
+        bool wasCurrentUnit = (nowRoundQueue.Count > 0 && nowRoundQueue[0] == unitID);
+
+        // 从两个队列中彻底移除
+        nowRoundQueue.Remove(unitID);
+        readyQueue.Remove(unitID);
+
+        Debug.Log($"[BattleQueue] RemoveUnit: 单位{unitID}已从所有队列移除");
+
+        // 如果被移除的正好是当前行动单位，需要推进回合
+        if (wasCurrentUnit)
         {
-            nowRoundQueue.Remove(unitID);
             if (nowRoundQueue.Count > 0)
             {
+                // 还有单位等待行动 → 触发下一个单位的 TurnStart
                 OnUnitTurnStart?.Invoke(nowRoundQueue[0]);
             }
             else
             {
-                // 队列为空，进入回合结束逻辑
+                // 当前队列已空 → 结束本回合（会触发 FinishRound 自动将 readyQueue 提升）
                 OnAllUnitsActed?.Invoke();
                 FinishRound();
             }
         }
-        Debug.Log($"[BattleQueue] RemoveUnit: 单位{unitID}已从队列移除");
     }
 
     /// <summary>

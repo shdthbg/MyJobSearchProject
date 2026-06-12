@@ -125,6 +125,13 @@ public class BattleManager : MonoBehaviour
     private void OnExternalUnitDied(int unitID)
     {
         if(!isBattleActive) return;
+        // 如果死亡单位正好是当前行动单位，先强制结束其回合（队列会切换到下一个单位）
+        int currentID = battleQueue.GetNowUnit();
+        if (currentID == unitID)
+        {
+            battleQueue.OnTurnEnd(unitID); // 这会在队列中标记单位完成，并触发下一单位的 TurnStart
+        }
+
         battleQueue.RemoveUnit(unitID);
         Debug.Log($"[BattleManager] 收到外部 UnitDied 事件，单位ID：{unitID}");
 
@@ -167,7 +174,7 @@ public class BattleManager : MonoBehaviour
     }
     private void OnUnitTurnStartBridge(int unitID)
     {
-        GameObject currentObj  = unitObjMap[unitID];
+        if (!unitObjMap.TryGetValue(unitID, out GameObject currentObj)) return;
         currentObj.GetComponent<UnitAPManager>().ResetAP();
         EventBus.EventTrigger(E_EventType.TurnStart, unitID);
                 
@@ -203,7 +210,8 @@ public class BattleManager : MonoBehaviour
     }
     public GameObject GetUnitObject(int unitID)
     {
-        return unitObjMap[unitID];
+        unitObjMap.TryGetValue(unitID, out GameObject obj);
+        return obj;  // 不存在时返回 null
     }
 
 }

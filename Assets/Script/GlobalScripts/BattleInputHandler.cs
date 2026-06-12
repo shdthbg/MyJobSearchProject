@@ -167,11 +167,11 @@ public class BattleInputHandler : MonoBehaviour
         {
             attackerID = attackerID,
             targetID = targetID,
-            damage = 10   // 暂时固定伤害，未来从武器获取
+            damage = 15   // 暂时固定伤害，未来从武器获取
         });
 
         // 播放攻击动画（待机→攻击）
-        var aniCtrl = attacker.GetComponent<BaseAniCtrl>();
+        var aniCtrl = attacker.GetComponent<NavMeshMoveCtrl>().CAniCtrl;
         if (aniCtrl != null)
         {
             aniCtrl.Idle1ToWalk = false;
@@ -195,7 +195,7 @@ public class BattleInputHandler : MonoBehaviour
         GameObject unit = BattleManager.Instance.GetUnitObject(unitID);
         if (unit != null)
         {
-            var aniCtrl = unit.GetComponent<BaseAniCtrl>();
+            var aniCtrl = unit.GetComponent<NavMeshMoveCtrl>().CAniCtrl;
             if (aniCtrl != null)
             {
                 aniCtrl.Idle1ToAttack = false;
@@ -216,7 +216,7 @@ public class BattleInputHandler : MonoBehaviour
         GameObject nearest = null;
 
         // 遍历战斗中的所有单位，筛选敌人
-        // ⚠️ 确保 BattleManager 中已添加：public Dictionary<int, GameObject> GetUnitObjMap() => unitObjMap;
+        // 确保 BattleManager 中已添加：public Dictionary<int, GameObject> GetUnitObjMap() => unitObjMap;
         Dictionary<int, GameObject> allUnits = BattleManager.Instance.GetUnitObjMap();
         if (allUnits == null) return null;
 

@@ -126,9 +126,13 @@ public class BattleInputHandler : MonoBehaviour
         // 点击到可行走地面 → 移动
         if (IsInLayer(hit.collider.gameObject, walkableLayer))
         {
+            if(!BattleManager.Instance.TrySpendCurrentUnitAP(currentID, 1))
+            {
+                Debug.Log("AP不足，无法移动");
+                return;
+            }
             moveCtrl.moveEndPos = hit.point;
             moveCtrl.Move();
-            BattleManager.Instance.TrySpendCurrentUnitAP(currentID, 1);
         }
     }
 
@@ -149,9 +153,13 @@ public class BattleInputHandler : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, walkableLayer))
         {
+            if(!BattleManager.Instance.TrySpendCurrentUnitAP(currentID, 1))
+            {
+                Debug.Log("AP不足，无法移动");
+                return;
+            }
             moveCtrl.moveEndPos = hit.point;
             moveCtrl.Move();
-            BattleManager.Instance.TrySpendCurrentUnitAP(currentID, 1);
         }
     }
 

@@ -73,6 +73,13 @@ public class BattleQueue
         
         InsertSorted(readyQueue, unitID);
         Debug.Log($"[BattleQueue] OnTurnEnd: 单位{unitID}从当前队列移除，已加入准备队列。当前队列剩余：{nowRoundQueue.Count}");
+        if(nowRoundQueue.Count == 0 && readyQueue.Count == 1 && readyQueue[0] == unitID)
+        {
+            Debug.LogError($"[BattleQueue] 死循环风险！单位 {unitID} 回合结束后立即再次获得回合。"
+             + "可能原因：AP 为 0 但自动跳过逻辑缺失。战斗终止。");
+            OnBattleEnd?.Invoke();
+            return;
+        }
         if (nowRoundQueue.Count > 0)
         {
             OnUnitTurnStart?.Invoke(nowRoundQueue[0]);

@@ -64,6 +64,12 @@ public class BattleManager : MonoBehaviour
             {
                 p.Value.AddComponent<UnitAPManager>();
             }
+            var cmc = p.Value.GetComponent<CharacterMoveControl>();
+            if(cmc != null) 
+            {
+                cmc.SetTargetPosition(cmc.transform.position); // 初始化目标位置为当前位置
+                cmc.enabled = false;// 禁用CharacterMoveControl，避免与战斗移动冲突
+            }
         }
         //把id->speed 数据压入队列初始化方法
         var speedIDs = new List<(int id ,float speed)>();
@@ -89,8 +95,19 @@ public class BattleManager : MonoBehaviour
         //取消TurnEnd和UnitDied的订阅
         EventBus.RemoveEventListener<int>(E_EventType.TurnEnd,OnExternalTurnEnd);
         EventBus.RemoveEventListener<int>(E_EventType.UnitDied,OnExternalUnitDied);
-        unitObjMap.Clear();
+
         battleQueue.BattleQueueClear();
+
+        foreach(var kvp in unitObjMap)
+        {
+            var cmc = kvp.Value.GetComponent<CharacterMoveControl>();
+            if(cmc != null) 
+            {
+                cmc.enabled = true;// 恢复CharacterMoveControl
+            }
+        }
+
+        unitObjMap.Clear();
         isBattleActive =false;
         EventBus.EventTrigger(E_EventType.BattleEnd);
         if(clickSelector != null)
@@ -111,7 +128,8 @@ public class BattleManager : MonoBehaviour
         unitObjMap.Add(id, obj);
         if (obj.GetComponent<UnitAPManager>() == null)
             obj.AddComponent<UnitAPManager>();
-
+            
+            obj.GetComponent<UnitAPManager>().ResetAP(); // 确保新加入单位的AP被初始化
         battleQueue.AddUnit(id, speed);
         Debug.Log($"[BattleManager] 新敌人 {id} 加入战斗");
     }
@@ -191,11 +209,19 @@ public class BattleManager : MonoBehaviour
     }
     public bool TrySpendCurrentUnitAP(int unitID, int cost)
     {
-        UnitAPManager currentUnitAPManger = unitObjMap[unitID].GetComponent<UnitAPManager>();
-        bool success = currentUnitAPManger.TrySpendAP(cost);
-        // 移除旧的自动 TurnEnd 逻辑
-        return success;
-    }
+        if (!unitObjMap.TryGetValue(unitID, out GameObject obj))
+        {
+            Debug.LogWarning($"[BattleManager] TrySpendAP: 单位 {unitID} 不在映射表中");
+            return false;
+        }
+        var apMgr = obj.GetComponent<UnitAPManager>();
+        if (apMgr == null)
+        {
+            Debug.LogError($"[BattleManager] TrySpendAP: 单位 {unitID} 缺少 UnitAPManager 组件");
+            return false;
+        }
+        return apMgr.TrySpendAP(cost);
+        }
     
     public bool IsCurrentUnitPlayer()
     {

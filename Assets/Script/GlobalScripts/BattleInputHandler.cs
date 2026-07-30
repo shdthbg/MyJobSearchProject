@@ -121,7 +121,7 @@ public class BattleInputHandler : MonoBehaviour
                             attackerID = currentID,
                             targetID = targetId.unitID,
                             damage = 15   // 暂时固定伤害，未来从武器获取
-                        });
+                        },hit.collider.transform);
                     }
                 }
                 else

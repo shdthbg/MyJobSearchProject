@@ -156,6 +156,12 @@ public class EnemyAI : MonoBehaviour
 
     private void DoAttack()
     {
+        Vector3 dir = targetPlayer.position - transform.position;
+        dir.y = 0; // 保持水平旋转
+        if(dir != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
         Debug.Log($"[EnemyAI] DoAttack 进入 | Idle1ToAttack当前值={animationCtrl.Idle1ToAttack} | 目标={targetPlayer?.name} | AP={apManager.currentAP}");
         // 1. 读取动画长度（在触发动画之前）
         attackClipLength = GetAttackClipLength();

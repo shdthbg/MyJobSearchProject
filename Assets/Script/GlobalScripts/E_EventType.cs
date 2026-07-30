@@ -15,5 +15,6 @@ public enum E_EventType
     HealthChanged,      // 参数：(int，int，int)分别是id/当前HP/最大HP
     UnitDied,           // 参数：ID（死亡单位）
     BattleQueueUpdated, // 参数：List<GameObject>（当前队列顺序）
-    AnimNotify          // 参数：AnimNotifyData（动画播放完毕等通用通知）
+    AnimNotify,         // 参数：AnimNotifyData（动画播放完毕等通用通知）
+    APChanged,          // 参数：UnitAPData（unitID, currentAP, maxAP）
 }

@@ -7,4 +7,5 @@ public struct AttackData
     public int attackerID;
     public int targetID;
     public int damage;
+    public Transform target;
 }

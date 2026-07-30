@@ -26,8 +26,14 @@ public class PlayerAttackHandler : MonoBehaviour
             StopCoroutine(attackCoroutine);
     }
 
-    public void DoAttack(AttackData data)
+    public void DoAttack(AttackData data,Transform target)
     {
+        Vector3 dir = target.position - transform.position;
+        dir.y = 0; // 保持水平旋转
+        if(dir != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
         pendingAttack = data;
 
         var moveCtrl = GetComponent<NavMeshMoveCtrl>();

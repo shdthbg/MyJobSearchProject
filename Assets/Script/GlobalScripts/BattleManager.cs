@@ -65,6 +65,11 @@ public class BattleManager : MonoBehaviour
                 p.Value.AddComponent<UnitAPManager>();
             }
             var cmc = p.Value.GetComponent<CharacterMoveControl>();
+            var nmc = p.Value.GetComponent<NavMeshMoveCtrl>();
+            if(nmc != null && nmc.isMoving)
+            {
+                nmc.StopMove();
+            }
             if(cmc != null) 
             {
                 cmc.SetTargetPosition(cmc.transform.position); // 初始化目标位置为当前位置

@@ -96,7 +96,7 @@ public class BattleInputHandler : MonoBehaviour
 
         NavMeshMoveCtrl moveCtrl = currentUnit.GetComponent<NavMeshMoveCtrl>();
         if (moveCtrl == null) return;
-        if (moveCtrl.isMoving) return;   // 移动中忽略点击
+        if (moveCtrl.isMoving) moveCtrl.StopMove();   // 移动中忽略点击
 
         // 点击到敌人 → 攻击
         if (IsInLayer(hit.collider.gameObject, characterLayer))
@@ -113,7 +113,16 @@ public class BattleInputHandler : MonoBehaviour
 
                 if (BattleManager.Instance.TrySpendCurrentUnitAP(currentID, 2))
                 {
-                    PerformAttack(currentUnit, targetId.gameObject, currentID);
+                    var attackHandler = currentUnit.GetComponent<PlayerAttackHandler>();
+                    if (attackHandler != null)
+                    {
+                        attackHandler.DoAttack(new AttackData
+                        {
+                            attackerID = currentID,
+                            targetID = targetId.unitID,
+                            damage = 15   // 暂时固定伤害，未来从武器获取
+                        });
+                    }
                 }
                 else
                 {
@@ -131,8 +140,15 @@ public class BattleInputHandler : MonoBehaviour
                 Debug.Log("AP不足，无法移动");
                 return;
             }
+            
+            //Debug.Log($"[BattleInput] 收到移动点击，目标={hit.point}");
+            //Debug.Log($"[BattleInput] TrySpendAP 结果={BattleManager.Instance.TrySpendCurrentUnitAP(currentID, 1)}");
+            //Debug.Log($"[BattleInput] moveCtrl.isMoving={moveCtrl.isMoving}, navAgent.isStopped={moveCtrl.navAgent?.isStopped}");
+            
             moveCtrl.moveEndPos = hit.point;
             moveCtrl.Move();
+            
+            //Debug.Log($"[BattleInput] Move()调用后: isMoving={moveCtrl.isMoving}, isStopped={moveCtrl.navAgent?.isStopped}");
         }
     }
 

@@ -1,143 +1,196 @@
-# 项目 README 文档
+# MyWarChess — 战棋回合制战斗系统
 
 ## 项目概述
 
-本项目是 Unity 环境下实现的一个回合制战斗系统，以游戏角色自由探索、靠近敌人自动进入战斗、战斗中消耗行动点（AP）进行移动/攻击为核心玩法。系统包含角色选择、入战检测、回合队列管理、AP 消耗、简单敌人 AI 以及动态增援机制。
+本项目是基于 Unity 的回合制战术 RPG 战斗系统原型。玩家自由探索场景，靠近敌人自动触发回合制战斗。战斗中通过 AP（行动点）系统控制移动和攻击，敌人具备完整的 AI 状态机（寻路→攻击→结束回合）。系统采用事件总线架构，模块间高度解耦。
 
 ## 核心功能
 
-- **自由探索与角色选择**：玩家点击己方角色可切换主控角色，Alt+点击地面或左键点击地面可控制角色移动（非战斗状态）。
-- **入战检测**：主控角色靠近敌人（距离 ≤ 阈值）时自动触发战斗，战斗期间触发器持续扫描，新增敌人可动态加入当前战斗。
-- **回合制战斗队列**：基于速度排序的回合队列（`BattleQueue`），每个回合内所有单位按顺序行动，全部行动完毕后进入下一回合。
-- **AP 系统**：每回合 3 点 AP，移动消耗 1 点，攻击消耗 2 点。AP 耗尽自动结束当前单位回合；AP 不足时可由玩家手动结束回合（空格键）。
-- **动态增援**：战斗进行中，其他敌人进入触发器范围且满足距离条件时，自动插入准备队列，下回合开始行动。
-- **相机跟随**：战斗时相机自动跟随当前行动单位（玩家或敌人），战斗结束后恢复跟随主控角色。
-- **事件总线**：使用 `EventBus` 解耦模块间通信（如回合开始、单位行动、战斗结束等）。
+### 已实现
+- **自由探索与角色选择**：点击己方角色切换主控，点击地面控制移动（NavMesh 寻路 + 距离限制）
+- **入战检测与动态增援**：主控角色靠近敌人自动触发战斗，战斗中新敌人进入范围可动态加入队列
+- **回合制战斗队列**：基于速度降序排列的双队列系统（当前队列 + 准备队列），回合自动流转
+- **AP 系统**：每回合 AP 可配置，移动/攻击消耗不同点数，AP 预算影响 AI 决策
+- **Animation Event 驱动攻击**：攻击动画通过 Animation Event 精确控制击打帧 → 伤害判定，近战远程统一
+- **敌人 AI 状态机**：Idle → ChooseAction → Moving/Attacking → EndTurn，含移动中实时检测进入攻击范围
+- **动态相机系统**：球面环绕相机，战斗时自动聚焦当前行动单位，遮挡检测
+- **事件总线架构**：`EventBus` 解耦所有模块通信，TurnStart/Attacked/HealthChanged 等 10+ 事件类型
+- **UI 骨架**：面板管理器 (`UIManager`) + 基类 (`BasePanel`)，回合指示 + AP 实时显示
+
+### 待实现
+- World Space 角色头顶血条 (`UnitHPBar`)
+- 跳过回合按钮
+- 队伍血条列表 (`UnitHPList`)
+- 伤害飘字 (`DamagePopupMgr`)
+- 胜利/战败面板与战败恢复
+- 攻击范围光标（红绿显示）
+- 远程攻击（射线检测）
 
 ## 系统架构
 
-### 脚本一览
+### 脚本清单（按职责分组）
 
-| 脚本 | 挂载对象 | 职责 |
-| ------ | ---------- | ------ |
-| `SelectEvent` | 全局单例 | 选中/取消选中角色的事件分发 |
-| `ClickSelector` | 全局对象 | 自由探索阶段的鼠标点击选择与移动 |
-| `BattleInputHandler` | 全局对象 | 战斗内输入处理（鼠标移动、快捷键攻击、空格结束回合） |
-| `BattleManager` | 全局单例 | 战斗生命周期管理，AP 消耗，单位增援 |
-| `BattleQueue` | 非 MonoBehaviour | 回合队列排序与推进 |
-| `BattleProximityDetector` | 每个玩家角色 | 入战触发器与持续检测 |
-| `EnemySensor` | 每个敌人 | NavMesh 路径距离判断 |
-| `UnitAPManager` | 自动挂载至战斗单位 | AP 重置与消耗 |
-| `UnitIdentity` | 每个单位 | 标识 ID、速度、是否是玩家 |
-| `NavMeshMoveCtrl` | 玩家/敌人 | 基于 NavMesh 的限距移动 |
-| `CamFollow` | 主相机 | 球面相机跟随与视线遮挡处理 |
-| `EventBus` | 全局单例 | 事件系统 |
-| `InputManager` | 全局对象 | 输入事件（左键、Alt+左键） |
+#### 全局系统
+| 脚本 | 类型 | 职责 |
+|------|------|------|
+| `EventBus` | 静态类 | 事件订阅/广播，支持泛型参数 |
+| `E_EventType` | 枚举 | 10+ 事件类型定义 |
+| `BattleManager` | 单例 MonoBehaviour | 战斗生命周期管理、AP 消耗、单位增援 |
+| `BattleQueue` | 普通类 | 双队列回合排序与推进 |
+| `SelectEvent` | 单例 MonoBehaviour | 角色选中/取消选中事件 |
+| `InputManager` | MonoBehaviour | 鼠标输入分发（左键/Alt+左键） |
+| `ClickSelector` | MonoBehaviour | 自由探索阶段点击选择与移动 |
+| `AttackSystem` | MonoBehaviour | 监听 Attacked 事件 → 调用 HealthComponent.TakeDamage |
 
-### 数据流
+#### 角色组件（挂载在每个战斗单位上）
+| 脚本 | 职责 |
+|------|------|
+| `UnitIdentity` | 唯一 ID、速度、队伍归属 (isPlayer) |
+| `UnitAPManager` | AP 管理 + `APChanged` 事件广播 |
+| `HealthComponent` | HP 管理 + `HealthChanged`/`UnitDied` 事件 |
+| `NavMeshMoveCtrl` | NavMeshAgent 寻路 + 距离限制 + 自驱动到达检测 |
+| `CharacterMoveControl` | 自由探索移动（入战后禁用） |
+| `BaseAniCtrl` | 动画参数控制 + Animation Event 中继 |
+| `EnemySensor` | NavMesh 路径距离判定（入战检测用） |
+| `BattleProximityDetector` | 入战触发器 + 持续扫描动态增援 |
+
+#### 战斗输入
+| 脚本 | 职责 |
+|------|------|
+| `BattleInputHandler` | 战斗内鼠标点击移动/攻击 + 快捷键 |
+| `PlayerAttackHandler` | 玩家攻击协调器，Animation Event → 伤害判定 |
+| `EnemyAI` | 敌人状态机（5 状态：Idle→ChooseAction→Moving→Attacking→EndTurn） |
+
+#### UI
+| 脚本 | 职责 |
+|------|------|
+| `UIManager` | 单例，面板切换，BattleStart/End 自动联动 |
+| `BasePanel` | 抽象基类，Show/Hide + OnShow/OnHide 生命周期 |
+| `BattleUIPanel` | 回合指示 + AP 实时显示（事件驱动） |
+| `BattleResultPanel` | 胜负面板（空壳） |
+| `ExplorationUIPanel` | 探索面板（空壳） |
+
+#### 数据结构 (`Struct/`)
+| 文件 | 字段 |
+|------|------|
+| `AttackData` | `attackerID`, `targetID`, `damage` |
+| `UnitAPData` | `unitID`, `currentAP`, `maxAP` |
+
+### 事件一览
+
+| 事件 | 参数类型 | 触发者 | 消费者 |
+|------|------|------|------|
+| `BattleStart` | `List<(int,float,GameObject)>` | `BattleProximityDetector` | `UIManager`, `EnemyAI` |
+| `BattleEnd` | 无 | `BattleManager` | `UIManager` |
+| `RoundStart` | `List<int>` | `BattleQueue` | 日志/未来 UI |
+| `TurnStart` | `int unitID` | `BattleQueue` | `EnemyAI`, `BattleUIPanel` |
+| `TurnEnd` | `int unitID` | `EnemyAI`, `PlayerAttackHandler` | `BattleQueue` |
+| `AllUnitsActed` | 无 | `BattleQueue` | 日志 |
+| `APChanged` | `UnitAPData` | `UnitAPManager` | `BattleUIPanel` |
+| `Attacked` | `AttackData` | `EnemyAI`, `PlayerAttackHandler` | `AttackSystem` |
+| `HealthChanged` | `(int id, int hp, int max)` | `HealthComponent` | (待实现: `UnitHPBar`) |
+| `UnitDied` | `int unitID` | `HealthComponent` | `BattleManager` |
+
+### 数据流（核心路径）
 
 ```
-ClickSelector (探索输入)
-        ↓
-SelectEvent.TriggerCharacterSelected → BattleProximityDetector.SetActive
-        ↓
 BattleProximityDetector.PerformDetection
-    ├─ 战斗未激活 → BattleManager.StartBattle(participants)
-    └─ 战斗已激活 → BattleManager.AddUnitToBattle(newEnemies)
-        ↓
-BattleManager.StartBattle → BattleQueue.InitQueue → 回合循环
-        ↓
-BattleManager.OnUnitTurnStartBridge → UnitAPManager.ResetAP
-    ├─ 玩家 → BattleInputHandler 接收输入
-    └─ 敌人 → EnemyAutoTurnEnd 协程（延迟后结束）
-        ↓
-BattleInputHandler 按1/2键 → BattleManager.TrySpendUnitAP → AP→0自动结束
-BattleInputHandler 按空格 → EventBus 发布 TurnEnd
-        ↓
-BattleQueue.OnTurnEnd → 下一个单位或下一回合
+  └─ BattleManager.StartBattle(participants)
+       ├─ 为每个单位挂 UnitAPManager + 禁用 CharacterMoveControl
+       ├─ BattleQueue.InitQueue → TurnStart(unitID)
+       │    ├─ EnemyAI.OnTurnStart → 状态机激活
+       │    └─ BattleUIPanel.OnTurnStart → 更新 HUD
+       └─ UIManager.ShowPanel(battlePanel)
+
+回合内（敌人）：
+  EnemyAI.ChooseAction → DoMove/DoAttack
+    ├─ TrySpendAP → APChanged → BattleUIPanel 更新
+    ├─ Move() → NavMeshAgent 寻路 → CheckMoving 检测到达
+    └─ DoAttack → Idle1ToAttack = true → Animation Event
+         └─ BaseAniCtrl.AttackHitTriggered → EnemyAI.HandleAttackHit
+              └─ EventTrigger(Attacked) → AttackSystem → HealthComponent.TakeDamage
+
+回合内（玩家）：
+  BattleInputHandler.HandleLeftClick
+    ├─ 点击敌人 → PlayerAttackHandler.DoAttack → Animation Event → 伤害
+    ├─ 点击地面 → TrySpendAP(1) → moveCtrl.Move()
+    └─ 空格 → EventTrigger(TurnEnd)
+
+死亡链：
+  HealthComponent.TakeDamage → currentHP ≤ 0 → EventTrigger(UnitDied)
+    → BattleManager.OnExternalUnitDied → BattleQueue.RemoveUnit → EndBattle(一方全灭)
 ```
 
 ## 使用说明
 
 ### 环境要求
-
-- Unity 2020.3 或更高版本（建议 2022 LTS）
-- 导入 `NavMesh Components`（用于烘焙 NavMesh） `Window > AI > Navigation`
-- 导入 `Input System`（可选，当前使用旧版 Input Manager）
-- 在场景中烘焙 NavMesh Surface，覆盖可行走区域
+- Unity 2022 LTS 或更高版本
+- 场景需烘焙 NavMesh Surface（`Window > AI > Navigation`）
+- 无需额外插件
 
 ### 场景配置步骤
 
-1. **创建地面**：添加 Plane，设置 Layer 为 `Ground`（或自定义）。
-2. **创建玩家角色**：
-   - 任意 3D 模型，添加 `NavMeshAgent` 组件。
-   - 添加 `NavMeshMoveCtrl` 脚本，设置 `moveDistance = 10`，`moveSpeed` 等。
-   - 添加 `UnitIdentity`，填写 `unitID`（唯一），勾选 `isPlayer`，设置 `speed`。
-   - 添加 `CharacterMoveControl`（如果已有）。
-   - 将角色放入 `characterLayer`（用于点击选择）。
-3. **创建敌人**：
-   - 模型 + `NavMeshAgent` + `NavMeshMoveCtrl`（可选，AI 尚仅结束回合）。
-   - 添加 `UnitIdentity`，`isPlayer` 不勾选，填写 `unitID`。
-   - 添加 `EnemySensor` 脚本。
-   - 添加`Charactor Controller`组件
-4. **配置管理器**：
-   - 场景中必须有 `SelectEvent` 单例（挂任意对象）。
-   - `BattleManager` 单例（挂任意对象），并在 Inspector 中拖拽 `ClickSelector` 引用。
-   - `BattleInputHandler`：挂任意对象，拖拽 `InputManager`、选择 `characterLayer`（可选）和 `walkableLayer`。
-   - `CamFollow`：挂主相机，拖拽初始目标。
-   - `EventBus`：挂任意对象。
-   - `InputManager`：挂任意对象，配置左键/Alt+左键事件。
-5. **烘焙 NavMesh**：打开 Navigation 窗口，选中地面，勾选 Navigation Static，Bake。
+1. **全局对象**（任意 GameObject，建议放一个名为 `Managers` 的根节点下）：
+   - `BattleManager` + `UIManager` + `SelectEvent` + `EventBus`（空脚本即可） + `InputManager` + `ClickSelector`
+   - `BattleManager.Inspector`：拖 `ClickSelector` 引用
 
-### 快捷键（测试用）
+2. **玩家角色 Prefab**：
+   - `UnitIdentity`（`isPlayer=true`, 唯一 `unitID`, 设置 `speed`）
+   - `NavMeshMoveCtrl`（配置 `moveDistance`, `moveSpeed`）
+   - `CharacterMoveControl`
+   - `HealthComponent`（配置 `maxHP`）
+   - `BattleProximityDetector`（配置 `triggerRadius`/`engageDistance`）
+   - `PlayerAttackHandler`
+   - 子物体：`BaseAniCtrl` + `Animator`（带 `attack.anim` + Animation Event `OnAttackHit`）
 
-| 按键 | 功能 |
-| ------ | ------ |
-| 鼠标左键（战斗外） | 选择角色 / 点击地面移动 |
-| Alt + 左键（战斗外） | 强制点击地面移动（穿透角色） |
-| 鼠标左键（战斗内） | 移动当前玩家单位（消耗1AP） |
-| 数字键 `2` | 攻击（消耗2AP，尚未实现伤害） |
-| 空格 | 手动结束当前玩家回合 |
-| 鼠标右键拖拽 | 旋转摄像机 |
-| 滚轮 | 缩放摄像机 |
+3. **敌人 Prefab**：
+   - `UnitIdentity`（`isPlayer=false`）
+   - `NavMeshMoveCtrl`
+   - `HealthComponent`
+   - `EnemyAI`（配置 `attackRange`, `attackDamage`）
+   - `EnemySensor`
+   - 子物体：`BaseAniCtrl` + `Animator`（同上，Animation Event 配好）
 
-### 入战与战斗流程
+4. **UI（UIRoot Canvas）**：
+   - `UIManager`：拖三个 Panel 引用
+   - `BattlePanel` → `BattleUIPanel`：拖 `TurnIndicator` 和 `APDisplay` 的 `Text` 组件
+   - Animator Controller 的 Attack Transition：取消 `Has Exit Time`
 
-1. 选中一个玩家角色（主控）。
-2. 控制角色靠近敌人，当两者 NavMesh 路径距离 ≤ `engageDistance` 时，自动触发战斗。
-3. 战斗内：鼠标点击可行走地面 → 角色移动并消耗 1 AP；按 2 消耗 2 AP（攻击，日志显示但不造成伤害）；AP 归零自动结束回合。空格可强制结束。
-4. 敌人回合：等待 5 秒后自动结束（测试用，未来将改为 AI 决策）。
-5. 所有单位行动完毕后进入下一回合，直到战斗结束（目前通过 `EndBattle` 或 `BattleQueue.BattleQueueClear` 触发）。
+### 快捷键
 
-## 配置参数说明
+| 按键 | 上下文 | 功能 |
+|------|------|------|
+| 鼠标左键 | 探索中 | 选择角色 / 点击地面移动 |
+| Alt+左键 | 探索中 | 强制地面移动（穿透角色） |
+| 鼠标左键 | 战斗中 | 点击地面移动(1AP) / 点击敌人攻击(2AP) |
+| 数字键 `2` | 战斗中 | 攻击最近的敌人（消耗 2AP） |
+| 空格 | 战斗中 | 手动结束当前回合 |
+| 鼠标右键拖拽 | 全局 | 旋转摄像机 |
+| 滚轮 | 全局 | 缩放摄像机 |
+| `F1` | 全局 | 测试：启动战斗（`BattleTestStarter`） |
 
-### `BattleProximityDetector`
+## 配置参数速查
 
-- `engageDistance`：战斗触发距离（路径长度），默认 20。
-- `triggerRadius`：触发器半径 默认20（应 ≥ engageDistance）。
+| 脚本 | 参数 | 默认值 | 说明 |
+|------|------|:---:|------|
+| `UnitAPManager` | `maxAP` | 3 | 每回合行动点数 |
+| `EnemyAI` | `attackRange` | 2 | 近战攻击范围(米) |
+| `EnemyAI` | `attackDamage` | 15 | 攻击伤害 |
+| `NavMeshMoveCtrl` | `moveDistance` | 10 | 单次移动最大距离 |
+| `BattleProximityDetector` | `triggerRadius` | 20 | 触发器半径 |
+| `BattleProximityDetector` | `engageDistance` | 20 | 入战路径距离阈值 |
 
-### `NavMeshMoveCtrl`
+## 已知问题
 
-- `moveDistance`：每次移动最大距离（AP 限制），默认 10。
-- `moveSpeed`：移动速度。
+- 暂时使用 Legacy Text 组件（中文字体；后续迁移 TMP）
+- 暂无 World Space 血条，伤害只能在 Console 确认
+- 暂无战斗结果面板，一方全灭后仅 Console 日志
+- 远程攻击逻辑尚未实现
 
-### `UnitIdentity`
+## 贡献指南
 
-- `unitID`：唯一编号（不可重复）。
-- `speed`：速度值（影响回合顺序，越高越先行动）。
-- `isPlayer`：是否为玩家单位。
-
-### `BattleManager`
-
-- `clickSelector`：拖拽 `ClickSelector` 引用，用于战斗时禁用自由探索输入。
-
-## 已知问题与后续计划
-
-- 敌人 AI 仅自动结束回合，未实现移动/攻击决策。
-- 攻击未绑定伤害逻辑，也未联动 `UnitDied` 事件。
-- 战斗结束后未自动切换到胜利/失败状态，需手动调用 `EndBattle`。
-- `UnitAPManager` 的 `currentAP` 在 Inspector 上可读，但当前未在 UI 显示。
-
-## 贡献与修改
-
-如需扩展功能（如技能系统、装备、多队伍），建议保持 `EventBus` 事件模式，在 `BattleManager` 中添加新的事件桥接，并遵循现有的 AP 消耗接口。
+扩展功能时：
+1. 新事件类型在 `E_EventType` 枚举中添加
+2. 复杂数据使用 `Struct/` 下的结构体作为事件参数
+3. UI 面板继承 `BasePanel`，在 `OnShow/OnHide` 中管理事件订阅/注销
+4. `UIManager` 中拖入新 Panel 引用

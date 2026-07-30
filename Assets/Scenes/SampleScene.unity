@@ -714,6 +714,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveDistance: 10
+  navAgent: {fileID: 0}
   isMoving: 0
   moveEndPos: {x: 0, y: 0, z: 0}
   distanceTolerance: 0.2
@@ -1269,6 +1270,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveDistance: 10
+  navAgent: {fileID: 0}
   isMoving: 0
   moveEndPos: {x: 0, y: 0, z: 0}
   distanceTolerance: 0.2
@@ -1398,6 +1400,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHP: 30
   currentHP: 0
+--- !u!114 &1655711633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1244532540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8791245fa3f16ac49a863e9d7fbcda6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1910297423
 GameObject:
   m_ObjectHideFlags: 0
@@ -1943,6 +1957,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 277583573932214376, guid: 7e686ffbfb48ffb4c83bdcbbde68632c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1655711624}
+    - targetCorrespondingSourceObject: {fileID: 277583573932214376, guid: 7e686ffbfb48ffb4c83bdcbbde68632c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1655711633}
   m_SourcePrefab: {fileID: 100100000, guid: 7e686ffbfb48ffb4c83bdcbbde68632c, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class HealthComponent : MonoBehaviour
 {
-    [SerializeField] private int maxHP;
-    [SerializeField] private int currentHP;
+    [SerializeField] public int maxHP;
+    [SerializeField] public int currentHP;
     private UnitIdentity identity;
     void Awake()
     {

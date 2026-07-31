@@ -108,6 +108,7 @@ public class BattleManager : MonoBehaviour
             var cmc = kvp.Value.GetComponent<CharacterMoveControl>();
             if(cmc != null) 
             {
+                cmc.SetTargetPosition(kvp.Value.transform.position);
                 cmc.enabled = true;// 恢复CharacterMoveControl
             }
         }

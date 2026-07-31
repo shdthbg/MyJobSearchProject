@@ -18,6 +18,7 @@ public class BattleProximityDetector : MonoBehaviour
         trigger = gameObject.AddComponent<SphereCollider>();
         trigger.isTrigger = true;
         trigger.radius = triggerRadius;
+        trigger.center = Vector3.zero;
         trigger.enabled = false;
     }
     void Start()

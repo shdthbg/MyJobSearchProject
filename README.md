@@ -9,10 +9,10 @@
 
 本项目是一套基于 Unity 2022 LTS 的**回合制战术 RPG 战斗系统原型**，实现了"自由探索 ↔ 回合制战斗"的无缝切换。核心亮点：
 
-- **事件驱动架构**：自研泛型事件总线（`EventBus`）解耦全部模块，13 种事件类型覆盖战斗全生命周期，模块间零直接依赖
+- **事件驱动架构**：自研泛型事件总线（`EventBus`）解耦全部模块，13 种事件类型覆盖战斗全生命周期
 - **双队列轮转算法**：按速度降序排列的回合队列，支持战斗中途动态插入/移除单位，同速稳定保序
 - **完整战斗闭环**：攻击 → Animation Event 精确判定打击帧 → 伤害计算 → 血量更新 → World Space 头顶血条实时响应 → 死亡清除 → 胜负判定与脱战恢复
-- **敌人 AI 状态机**：五状态行为树（Idle → ChooseAction → Moving → Attacking → EndTurn），含 AP 预算决策、移动中实时检测攻击范围、面向目标攻击
+- **敌人 AI 状态机**：五状态状态机（Idle → ChooseAction → Moving → Attacking → EndTurn），含 AP 预算决策、移动中实时检测攻击范围、面向目标攻击
 - **表现层与逻辑层分离**：`BattleManager` 作为中间层，将队列变更转为标准事件驱动 UI/动画，逻辑层不感知表现细节
 
 ## 核心功能
@@ -30,8 +30,8 @@
 - **玩家操作**：战斗中点击地面移动 / 点击敌人攻击 / 数字键 `2` 攻击最近敌人 / 空格手动结束回合
 
 ### 敌人 AI
-- **五状态 FSM**：Idle（等待回合）→ ChooseAction（AP 预算决策）→ Moving（NavMesh 寻路，预判进入攻击范围停止）→ Attacking（触发攻击动画，Animation Event 判定伤害）→ EndTurn
-- **智能移动**：目标点设在 `攻击范围 × 0.8` 位置，确保到达后必定能攻击；移动中每帧重检距离，提前终止移动进入攻击
+- **五状态 状态机**：Idle（等待回合）→ ChooseAction（AP 预算决策）→ Moving（NavMesh 寻路，预判进入攻击范围停止）→ Attacking（触发攻击动画，Animation Event 判定伤害）→ EndTurn
+- **智能移动**：目标点设在 `攻击范围 × 0.8` 位置，确保到达后能攻击；移动中每帧重检距离，提前终止移动进入攻击
 - **面向攻击**：攻击前自动 `LookRotation` 面向目标，避免背对攻击的视觉 Bug
 
 ### 表现层
@@ -41,7 +41,7 @@
 - **动画系统**：`BaseAniCtrl` 统一管理动画参数，Animation Event 中继攻击命中回调，取消 Animator Transition 的 `Has Exit Time` 确保响应即时
 
 ### 架构亮点
-- **事件总线 `EventBus`**：基于枚举 ID 的静态泛型实现，编译期类型安全检查，支持值元组传参（如 `(int, int, int)`），Action 引用缓存保障事件正确注销，无重复订阅
+- **事件总线 `EventBus`**：基于枚举 ID 的静态泛型实现，编译期类型安全检查，Action 引用缓存保障事件正确注销，无重复订阅
 - **全模块解耦**：脚本间通过事件通信，无硬引用。例如 `EnemyAI` 不直接调用 `HealthComponent`，而是广播 `Attacked` 事件 → `AttackSystem` 独立处理伤害
 - **单例 + 管理器模式**：`BattleManager`、`UIManager`、`SelectEvent` 全局唯一，`DontDestroyOnLoad` 跨场景保留
 
@@ -114,7 +114,7 @@
 | `AnimNotify` | `AnimNotifyData`(预留) | `BaseAniCtrl` | 日志/未来通用动画回调 |
 | `UnitMoved` | `UnitMoveData`(预留) | `NavMeshMoveCtrl` | 日志/未来 UI |
 
-> 💡 **设计原则**：任何新功能只需在 `E_EventType` 中新增枚举值 → 生产者广播 → 消费者订阅，无需修改现有模块。
+> **设计原则**：任何新功能只需在 `E_EventType` 中新增枚举值 → 生产者广播 → 消费者订阅，无需修改现有模块。
 
 ### 核心数据流
 

@@ -75,3 +75,5 @@ crashlytics-build.properties
 # 4. 特定的临时/缓存文件 (如果观察到有此文件)
 # 忽略项目根目录下可能出现的特定缓存文件
 /your_specific_file.cache
+.editorconfig
+/your_specific_file.cache.editorconfig
